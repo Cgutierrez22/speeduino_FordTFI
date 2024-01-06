@@ -5428,9 +5428,11 @@ void triggerSetup_FORDTFI(void)
   secondaryToothCount = 0; //used to count non-trigger edges
   triggerFilterTime = 60000000L / MAX_RPM / configPage2.nCylinders; // Minimum time required between teeth
   triggerFilterTime = triggerFilterTime >> 2;  //divide by 2 for cam timing and by 2 for margin
-  secondDerivEnabled = false;
-  decoderIsSequential = true;
-  triggerToothAngleIsCorrect = true;
+  BIT_CLEAR(decoderState, BIT_DECODER_2ND_DERIV);
+  BIT_CLEAR(decoderState, BIT_DECODER_IS_SEQUENTIAL);
+  BIT_CLEAR(decoderState, BIT_DECODER_HAS_SECONDARY);
+  BIT_SET(decoderState, BIT_DECODER_HAS_FIXED_CRANKING);
+  BIT_SET(decoderState, BIT_DECODER_TOOTH_ANG_CORRECT);
   MAX_STALL_TIME = 116655UL; //Minimum 50rpm based on the 35 degree tooth spacing on 8 cylinder
   if(initialisationComplete == false) { toothLastToothTime = micros(); } //Set a startup value here to avoid filter errors when starting. This MUST have the initial check to prevent the fuel pump just staying on all the time
 
@@ -5470,7 +5472,7 @@ void triggerPri_FORDTFI(void)
     curTime = micros();
     curGap = curTime - curTime2;    
     if (curGap > triggerFilterTime){
-      validTrigger == true;//flag as valid trigger
+      BIT_SET(decoderState, BIT_DECODER_VALID_TRIGGER);//flag as valid trigger
       toothLastMinusOneToothTime = toothLastToothTime;
       toothLastToothTime = curTime;
       targetGap2 = toothLastToothTime - toothLastMinusOneToothTime;                     
@@ -5507,7 +5509,7 @@ void triggerPri_FORDTFI(void)
       }//has sync
     }//filter
     else {       
-      validTrigger = false; //Flag this pulse as not being a valid trigger
+      BIT_SET(decoderState, BIT_DECODER_VALID_TRIGGER); //Flag this pulse as not being a valid trigger
       if (currentStatus.hasSync == true) { currentStatus.syncLossCounter++; }
       currentStatus.hasSync = false;
       triggerFilterTime = 0;
@@ -5568,7 +5570,7 @@ int getCrankAngle_FORDTFI(void)
 
     //Estimate the number of degrees traveled since the last tooth}
     elapsedTime = (lastCrankAngleCalc - tempToothLastToothTime);
-    crankAngle += timeToAngle(elapsedTime, CRANKMATH_METHOD_INTERVAL_TOOTH);
+    crankAngle += timeToAngleIntervalTooth(elapsedTime);
 
     if (crankAngle >= 720) { crankAngle -= 720; }
     if (crankAngle > CRANK_ANGLE_MAX) { crankAngle -= CRANK_ANGLE_MAX; }
@@ -5578,8 +5580,7 @@ int getCrankAngle_FORDTFI(void)
 }
 
 void triggerSetEndTeeth_FORDTFI(void)
-{  
-  lastToothCalcAdvance = currentStatus.advance;
+{ 
 }
 /** @} */
 /** @} */
