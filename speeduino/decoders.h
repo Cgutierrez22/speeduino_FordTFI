@@ -39,6 +39,7 @@
 #define DECODER_VMAX              23
 #define DECODER_RENIX             24
 #define DECODER_ROVERMEMS		      25
+#define DECODER_FORDTFI           26
 
 #define BIT_DECODER_2ND_DERIV           0 //The use of the 2nd derivative calculation is limited to certain decoders. This is set to either true or false in each decoders setup routine
 #define BIT_DECODER_IS_SEQUENTIAL       1 //Whether or not the decoder supports sequential operation
@@ -240,6 +241,13 @@ void triggerSec_Vmax(void);
 uint16_t getRPM_Vmax(void);
 int getCrankAngle_Vmax(void);
 void triggerSetEndTeeth_Vmax(void);
+
+void triggerSetup_FORDTFI(void);
+void triggerPri_FORDTFI(void);
+void triggerSec_FORDTFI(void);
+void triggerSec_FORDTFI(void);
+uint16_t getRPM_FORDTFI(void);
+void triggerSetEndTeeth_FORDTFI(void);
 
 extern void (*triggerHandler)(void); //Pointer for the trigger function (Gets pointed to the relevant decoder)
 extern void (*triggerSecondaryHandler)(void); //Pointer for the secondary trigger function (Gets pointed to the relevant decoder)
