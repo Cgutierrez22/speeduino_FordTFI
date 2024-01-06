@@ -5434,7 +5434,7 @@ void triggerSetup_FORDTFI(void)
   BIT_SET(decoderState, BIT_DECODER_HAS_FIXED_CRANKING);
   BIT_SET(decoderState, BIT_DECODER_TOOTH_ANG_CORRECT);
   MAX_STALL_TIME = 116655UL; //Minimum 50rpm based on the 35 degree tooth spacing on 8 cylinder
-  if(initialisationComplete == false) { toothLastToothTime = micros(); } //Set a startup value here to avoid filter errors when starting. This MUST have the initial check to prevent the fuel pump just staying on all the time
+  if(currentStatus.initialisationComplete == false) { toothLastToothTime = micros(); } //Set a startup value here to avoid filter errors when starting. This MUST have the initial check to prevent the fuel pump just staying on all the time
 
   //Note that these angles are for every trigger edge and get adjusted by trigger angle
   if (configPage2.nCylinders == 4) {
