@@ -247,6 +247,7 @@ void triggerPri_FORDTFI(void);
 void triggerSec_FORDTFI(void);
 void triggerSec_FORDTFI(void);
 uint16_t getRPM_FORDTFI(void);
+int getCrankAngle_FORDTFI(void);
 void triggerSetEndTeeth_FORDTFI(void);
 
 extern void (*triggerHandler)(void); //Pointer for the trigger function (Gets pointed to the relevant decoder)
