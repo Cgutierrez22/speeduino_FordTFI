@@ -5437,13 +5437,15 @@ void triggerSetup_FORDTFI(void)
   if(currentStatus.initialisationComplete == false) { toothLastToothTime = micros(); } //Set a startup value here to avoid filter errors when starting. This MUST have the initial check to prevent the fuel pump just staying on all the time
 
   //Note that these angles are for every trigger edge and get adjusted by trigger angle
-  if (configPage2.nCylinders == 4) {
+  if (configPage2.nCylinders == 4) 
+  {
     toothAngles[0] = 0;   //Trigger edge of tooth #1  
     toothAngles[1] = 180;  //Trigger edge of tooth #2  
     toothAngles[2] = 360;  //Trigger edge of tooth #3  
     toothAngles[3] = 540;  //Trigger edge of tooth #4     
   }
-  else if (configPage2.nCylinders == 6) {
+  else if (configPage2.nCylinders == 6) 
+  {
     toothAngles[0] = 0;   //Trigger edge of tooth #1  
     toothAngles[1] = 120;  //Trigger edge of tooth #2  
     toothAngles[2] = 240;  //Trigger edge of tooth #3  
@@ -5451,7 +5453,8 @@ void triggerSetup_FORDTFI(void)
     toothAngles[4] = 480;  //Trigger edge of tooth #5  
     toothAngles[5] = 600;  //Trigger edge of tooth #6
   }
-  else { // defaults to 8 cylinder (configPage2.nCylinders == 8)  
+  else // defaults to 8 cylinder (configPage2.nCylinders == 8)
+  {   
     toothAngles[0] = 0;    //Trigger edge of tooth #1
     toothAngles[1] = 90;   //Trigger edge of tooth #2
     toothAngles[2] = 180;  //Trigger edge of tooth #3
@@ -5467,32 +5470,39 @@ void triggerSetup_FORDTFI(void)
 void triggerPri_FORDTFI(void)
 {
 
-  if (READ_PRI_TRIGGER() == primaryTriggerEdge ){//Trigger edge detected
+  if (READ_PRI_TRIGGER() == primaryTriggerEdge ) //Trigger edge detected
+  {
     lastGap = curGap;
     curTime = micros();
     curGap = curTime - curTime2;    
-    if (curGap > triggerFilterTime){
+    if (curGap > triggerFilterTime)
+    {
       BIT_SET(decoderState, BIT_DECODER_VALID_TRIGGER);//flag as valid trigger
       toothLastMinusOneToothTime = toothLastToothTime;
       toothLastToothTime = curTime;
       targetGap2 = toothLastToothTime - toothLastMinusOneToothTime;                     
-      if (toothCurrentCount == 1) {  //check for large gap on trigger after signature tooth
+      if (toothCurrentCount == 1)   //check for large gap on trigger after signature tooth
+      {
         targetGap = (curGap2 * 3) >> 1 ; //targetGap is 1.5 times last trigger width to confirm signature tooth
-        if ((curGap > targetGap) && (curGap > lastGap)) {  //confirm signature tooth by trigger edge                      
+        if ((curGap > targetGap) && (curGap > lastGap)) //confirm signature tooth by trigger edge
+        {                        
           currentStatus.hasSync = true;
           currentStatus.startRevolutions++; //Revolution Counter
         }  
-        else {
-          currentStatus.hasSync = false; // large gap after signature tooth not detected so sync lost.
+        else // large gap after signature tooth not detected so sync lost.
+        {
+          currentStatus.hasSync = false; 
           currentStatus.syncLossCounter++;
           triggerFilterTime = 0;  //reset filter
           toothCurrentCount = 99; //fake count
         }
       }
-      if (currentStatus.hasSync == true){
+      if (currentStatus.hasSync == true)
+      {
         setFilter(targetGap2); // filter adjusted by trigger edge gap
         toothCurrentCount ++;  //increment tooth count on trigger edge
-        if (toothCurrentCount > triggerActualTeeth){  //reset counter
+        if (toothCurrentCount > triggerActualTeeth) //reset counter
+        {  
          toothCurrentCount = 1;
          toothOneMinusOneTime = toothOneTime; //set last time tooth 1 seen for revolutions
          toothOneTime = curTime;  // set current tooth one time
@@ -5501,48 +5511,44 @@ void triggerPri_FORDTFI(void)
         if (toothCurrentCount == ((configPage2.nCylinders/2) + 1)) {currentStatus.startRevolutions++;} //Additional revolution Counter for Cam speed        
           
         //New ignition mode 
-        if( configPage2.perToothIgn == true ){                  
+        if( configPage2.perToothIgn == true )
+        {                  
           int16_t crankAngle = ignitionLimits( (toothAngles[(toothCurrentCount-1)] + configPage4.triggerAngle) );
           checkPerToothTiming(crankAngle, toothCurrentCount);         
         }
 
-      }//has sync
-    }//filter
-    else {       
+      } //end has sync
+    }//end filter
+    else 
+    {       
       BIT_SET(decoderState, BIT_DECODER_VALID_TRIGGER); //Flag this pulse as not being a valid trigger
       if (currentStatus.hasSync == true) { currentStatus.syncLossCounter++; }
       currentStatus.hasSync = false;
       triggerFilterTime = 0;
       toothCurrentCount = 99; //fake count
     }
-  }  //primary trigger edge
-  else {  //non-trigger edge    
+  }  //end primary trigger edge
+  else //non-trigger edge
+  {      
     curTime3 = curTime2;  //CurTime3 is last non-trigger edge time
     curTime2 = micros();  //curTime2 is this non-trigger edge time
     curGap3 = curTime2 - curTime3;  //non-trigger edge width
     curGap2 = curTime2 - toothLastToothTime;  //current tooth width using last valid trigger
-    if (curGap2 > triggerFilterTime){ //check for validity 
-      //validTrigger = true; // valid non-trigger edge
-      if (currentStatus.hasSync == false){  // Only look for signature tooth when no sync
-        if (curGap2 < lastGap && curGap3 < targetGap2){//if current tooth smaller than last gap and if falling edge gap larger than rising edge gap this is signture tooth.
+    if (curGap2 > triggerFilterTime) //check for validity 
+    {
+      if (currentStatus.hasSync == false) // Only look for signature tooth when no sync
+      {  
+        if (curGap2 < lastGap && curGap3 < targetGap2) //if current tooth smaller than last gap and if falling edge gap larger than rising edge gap this is signture tooth.
+        {
          currentStatus.hasSync = true;
          toothCurrentCount = 1; //signature tooth found
          toothOneMinusOneTime = toothOneTime;
          toothOneTime = toothLastToothTime; //since this is non-trigger edge, last trigger edge time used
         }
       }
-    } //filter
-    /*else {       
-     validTrigger = false; //Flag this pulse as not being a valid trigger
-     if (currentStatus.hasSync == true) { currentStatus.syncLossCounter++; }
-     currentStatus.hasSync = false;
-     triggerFilterTime = 0;
-     toothCurrentCount = 99;  //fake count 
-    }*/  
-  }
- 
+    } //end non-trigger filter
+  } 
 }
-
 
 void triggerSec_FORDTFI(void) { return; } //Not required
 
