@@ -5429,7 +5429,7 @@ void triggerSetup_FORDTFI(void)
   triggerFilterTime = 60000000L / MAX_RPM / configPage2.nCylinders; // Minimum time required between teeth
   triggerFilterTime = triggerFilterTime >> 2;  //divide by 2 for cam timing and by 2 for margin
   BIT_CLEAR(decoderState, BIT_DECODER_2ND_DERIV);
-  BIT_CLEAR(decoderState, BIT_DECODER_IS_SEQUENTIAL);
+  BIT_SET(decoderState, BIT_DECODER_IS_SEQUENTIAL);
   BIT_CLEAR(decoderState, BIT_DECODER_HAS_SECONDARY);
   BIT_SET(decoderState, BIT_DECODER_HAS_FIXED_CRANKING);
   BIT_SET(decoderState, BIT_DECODER_TOOTH_ANG_CORRECT);
@@ -5521,7 +5521,7 @@ void triggerPri_FORDTFI(void)
     }//end filter
     else 
     {       
-      BIT_SET(decoderState, BIT_DECODER_VALID_TRIGGER); //Flag this pulse as not being a valid trigger
+      BIT_CLEAR(decoderState, BIT_DECODER_VALID_TRIGGER); //Flag this pulse as not being a valid trigger
       if (currentStatus.hasSync == true) { currentStatus.syncLossCounter++; }
       currentStatus.hasSync = false;
       triggerFilterTime = 0;
